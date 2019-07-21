@@ -8,7 +8,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
-export default class FileReader extends Vue {
+export default class TextSaver extends Vue {
 
 }
 </script>
