@@ -66,8 +66,7 @@ export default class WordBlock extends Vue {
 
   public shortcut(e: any) {
     if (!this.selected) return;
-    for (const cls in this.classes) {
-      if (!this.legend[cls]) continue;
+    for (const cls of this.classes) {
       if (this.legend[cls].shortcut === e.key.toUpperCase()) {
         this.onChange(this.id, cls);
         return;

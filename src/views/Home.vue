@@ -31,9 +31,9 @@ const LEGEND = {
   "EVT": {name: "イベント", example: "アジア通貨危機，台風3号", shortcut: "E"},
   "LOC": {name: "地名", example: "アメリカ，白巳津川市", shortcut: "L"},
   "ORG": {name: "組織名", example: "自民党，NHK", shortcut: "O"},
-  "M-PSN": {name: "人名 (男)", example: "瓜生慎吾", shortcut: "M"},
-  "W-PSN": {name: "人名 (女)", example: "天羽みう", shortcut: "W"},
-  "X-PSN": {name: "人名 (その他)", example: "ぱんにゃ", shortcut: "X"},
+  "PSN-M": {name: "人名 (男)", example: "瓜生慎吾", shortcut: "M"},
+  "PSN-W": {name: "人名 (女)", example: "天羽みう", shortcut: "W"},
+  "PSN-X": {name: "人名 (その他)", example: "ぱんにゃ", shortcut: "X"},
   "TIM": {name: "時間", example: "午後三時，10:30", shortcut: "T"},
   "NUM": {name: "数値", example: "241円，3個，8割", shortcut: "N"},
 };
