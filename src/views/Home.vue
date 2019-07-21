@@ -26,7 +26,7 @@ import Legend from '@/components/Legend.vue';
 
 
 const LEGEND = {
-  "O" : {name: "その他", example: "てにおは，部活動", shortcut: "1"},
+  "O" : {name: "その他", example: "てにおは，部活動", shortcut: "0"},
   "ART": {name: "人工物", example: "アーティファクト，カイロスの時", shortcut: "A"},
   "EVT": {name: "イベント", example: "アジア通貨危機，台風3号", shortcut: "E"},
   "LOC": {name: "地名", example: "アメリカ，白巳津川市", shortcut: "L"},
