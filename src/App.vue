@@ -23,7 +23,7 @@ $primary: #e27c15;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 
