@@ -4,7 +4,7 @@
       class="button is-primary" 
       @click="download" 
       :href="downloadLink" 
-      :download="filename"
+      :download="annotatedName()"
     >
       ダウンロード
     </a>
@@ -27,6 +27,13 @@ export default class TextSaver extends Vue {
 
   private downloadLink: string = "#";
 
+  private annotatedName(): string {
+    if (this.filename === null) return "#";
+    const parts = this.filename.split('.');
+    const name = parts.splice(0, parts.length - 1).join(".");
+    return name + "_annotated";
+  }
+
   private zip(arr1: any[], arr2: any[]): any[] {
     return arr1.map((_, i) => [arr1[i], arr2[i]]);
   }
@@ -48,7 +55,7 @@ export default class TextSaver extends Vue {
       if (pair[0] === "EOS") return;
       result += pair[0] + "\t" + pair[1].cls + "\n";
     });
-    this.downloadText(this.filename + "_annotated", result);
+    this.downloadText(this.annotatedName(), result);
   }
 }
 </script>

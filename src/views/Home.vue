@@ -26,11 +26,11 @@ import Legend from '@/components/Legend.vue';
 
 
 const LEGEND = {
-  "O" : {name: "その他", example: "てにおは，部活動", shortcut: "0"},
+  "O" : {name: "その他", example: "てにおは，部活動", shortcut: "O"},
   "ART": {name: "人工物", example: "アーティファクト，カイロスの時", shortcut: "A"},
   "EVT": {name: "イベント", example: "アジア通貨危機，台風3号", shortcut: "E"},
   "LOC": {name: "地名", example: "アメリカ，白巳津川市", shortcut: "L"},
-  "ORG": {name: "組織名", example: "自民党，NHK", shortcut: "O"},
+  "ORG": {name: "組織名", example: "自民党，NHK", shortcut: "R"},
   "PSN-M": {name: "人名 (男)", example: "瓜生慎吾", shortcut: "M"},
   "PSN-W": {name: "人名 (女)", example: "天羽みう", shortcut: "W"},
   "PSN-X": {name: "人名 (その他)", example: "ぱんにゃ", shortcut: "X"},
