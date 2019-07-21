@@ -24,6 +24,7 @@ $primary: #e27c15;
   text-align: center;
   color: #2c3e50;
   margin-top: 30px;
+  margin-bottom: 100px;
 }
 
 

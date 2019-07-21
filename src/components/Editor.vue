@@ -1,24 +1,29 @@
 <template>
-  <div class="editor box"
+  <div class="editor box has-text-white"
     @keydown.exact.tab="onTab" 
     @keydown.shift.tab="onTabBack"
   >
+    <p v-if="words.length === 0">ここに単語が表示されます．</p>
+
     <WordBlock v-for="word in words" 
       :key="word.id" 
+      :legend="legend"
+      :classes="classes"
       :id="word.id"
       :cls="word.cls" 
       :selected="word.selected" 
-      :classes="classes"
       @onSelect="onSelect" 
-      @onChange="onChange"
-      >
+      @onChange="onChange" 
+      @onUnselect="unselect"
+    >
       {{ word.word }}
     </WordBlock>
+    <input type="hidden" id="keyboard">
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Vue, Emit } from 'vue-property-decorator';
 import WordBlock from '@/components/WordBlock.vue';
 
 @Component({
@@ -28,12 +33,13 @@ import WordBlock from '@/components/WordBlock.vue';
 })
 export default class Editor extends Vue {
   @Prop({required: true})
-  public legend!: object[];
+  public legend!: object;
 
   @Prop()
   public text: string | null = null;
 
-  public words: any[] = [];
+  @Prop({required: true})
+  public words!: any[];
 
   private classes: string[] = [];
   private selected: number | null = null;
@@ -42,27 +48,33 @@ export default class Editor extends Vue {
     this.classes = Object.keys(this.legend);
   }
 
+  @Emit('onUpdate')
+  public onUpdate(id: number, attr: string, value: any) {}
+
   public onSelect(id: number) {
     if (this.selected !== id) { // 違う単語を選んだ時
       // すでに選ばれているものがあればそれを解除
       if (this.selected !== null) {
-        this.words[this.selected].selected = false;
+        this.onUpdate(this.selected, 'selected', false);
       }
-      this.words[id].selected = true; // 選ばれた単語を選択状態にする
+      this.onUpdate(id, 'selected', true); // 選ばれた単語を選択状態にする
       this.selected = id; // 現在選択されている単語のIDを保持する
-    } else { // 同じ単語をクリックした時は選択解除
-      this.words[id].selected = false;
-      this.selected = null;
-    }
+    } else this.unselect(); // 同じ単語をクリックした時は選択解除
+  }
+
+  public unselect() {
+    if (!this.selected) return;
+    this.onUpdate(this.selected, 'selected', false);
+    this.selected = null;
   }
 
   public onChange(id: number, cls: string) {
-    this.words[id].cls = cls;
+    this.onUpdate(id, 'cls', cls);
   }
 
   public onTab() {
     if (this.selected === null) return;
-    if (this.selected >= this.words.length) return;
+    if (this.selected >= this.words.length - 1) return;
     this.onSelect(this.selected + 1);
   }
 
@@ -71,21 +83,6 @@ export default class Editor extends Vue {
     if (this.selected <= 0) return;
     this.onSelect(this.selected - 1);
   }
-
-  @Watch('text')
-  public textToWords() {
-    if (this.text === null) { return; }
-
-    let id: number = 0;
-    for (const line of this.text.split("\n")) {
-      if (line === "EOS") break;
-      const word = line.split("\t");
-      let cls: string = word[2] || "O";
-      if (cls !== "O" && !this.classes.includes(cls)) cls = "O";
-      this.words.push({id: id++, word: word[0], cls, selected: false});
-    }
-  }
-
 }
 </script>
 

@@ -5,7 +5,13 @@
   >
     <slot></slot><br>
     <div class="select is-small">
-      <select @click.stop="" @change="change">
+      <select 
+        @click.stop="" 
+        @change="change" 
+        @keydown.exact.esc="onUnselect"
+        @keydown.exact.enter="select"
+        @keydown="shortcut"
+      >
         <option v-for="c in classes" :key="c" :selected="c==cls">
           {{ c }}
         </option>
@@ -15,10 +21,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Emit, Vue } from 'vue-property-decorator';
+import { Component, Prop, Emit, Vue} from 'vue-property-decorator';
 
 @Component
 export default class WordBlock extends Vue {
+  @Prop({required: true})
+  public legend!: any;
+
   @Prop({required: true})
   public classes!: string[];
 
@@ -37,24 +46,33 @@ export default class WordBlock extends Vue {
   @Emit('onChange')
   public onChange(id: number, cls: string) {}
 
+  @Emit('onUnselect')
+  public onUnselect() {}
+
   public click(e: any) {
     this.onSelect(this.id);
-    // selectにフォーカス
+    e.currentTarget.children[1].children[0].focus(); // selectにフォーカス
+  }
+
+  public select() {
+    if (!this.selected) this.onSelect(this.id);
   }
 
   public change(e: any) {
-    const selectedCls: string = this.classes[e.target.selectedIndex];
+    const id = e.target.selectedIndex;
+    const selectedCls: string = this.classes[id];
     this.onChange(this.id, selectedCls);
   }
 
-  public created() {
-    // document.getElementsByClassName("word-block")[this.id].addEventListener('keydown', (e: any) => {
-    //   console.log(e.keyCode);
-    // });
-  }
-
-  public shortcutSelect(e: any) {
+  public shortcut(e: any) {
     if (!this.selected) return;
+    for (const cls in this.classes) {
+      if (!this.legend[cls]) continue;
+      if (this.legend[cls].shortcut === e.key.toUpperCase()) {
+        this.onChange(this.id, cls);
+        return;
+      }
+    }
   }
 }
 </script>

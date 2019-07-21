@@ -25,7 +25,7 @@ export default class TextReader extends Vue {
   private filename: string | null = null;
 
   @Emit("onTextRead")
-  public onTextRead(text: string) {}
+  public onTextRead(filename: string, text: string) {}
 
   private onFileChange(e: any) {
 
@@ -36,13 +36,13 @@ export default class TextReader extends Vue {
 
     const files = e.target.files || e.dataTransfer.files;
     this.filename = files[0].name;
-    this.readFile(files[0]);
+    this.readFile(files[0].name, files[0]);
   }
 
-  private readFile(file: File) {
+  private readFile(filename: string, file: File) {
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      this.onTextRead(e.target.result);
+      this.onTextRead(filename, e.target.result);
     };
     reader.readAsText(file);
   }
