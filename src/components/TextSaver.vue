@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="filename !== null">
     <a id="download-link"
       class="button is-primary" 
       @click="download" 
