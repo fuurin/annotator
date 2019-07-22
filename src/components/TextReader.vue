@@ -22,27 +22,37 @@ import { Component, Prop, Emit, Vue } from 'vue-property-decorator';
 
 @Component
 export default class TextReader extends Vue {
-  private filename: string | null = null;
+  @Prop({required: true})
+  private maxFiles!: number;
 
-  @Emit("onTextRead")
-  public onTextRead(filename: string, text: string) {}
+  @Prop()
+  private files: any[] = [];
+
+  @Emit()
+  private input(files: any[]) {}
 
   private onFileChange(e: any) {
 
-    if (this.filename !== null) {
+    if (this.files) {
       const confText = "編集中の内容は保存されません．\n新しいファイルを読み込みますか？";
       if (!confirm(confText)) return;
     }
 
+    const fileList: any[] = [];
+
     const files = e.target.files || e.dataTransfer.files;
-    this.filename = files[0].name;
-    this.readFile(files[0].name, files[0]);
+    for (let i = 0; i < this.maxFiles; i++) {
+      const name: string = files[i].name;
+      if (name) fileList.push(this.readFile(files[0].name, files[0]));
+    }
+
+    this.input(fileList);
   }
 
   private readFile(filename: string, file: File) {
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      this.onTextRead(filename, e.target.result);
+      return {name: filename, text: e.target.result};
     };
     reader.readAsText(file);
   }

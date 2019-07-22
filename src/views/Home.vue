@@ -3,10 +3,20 @@
     <div class="columns">
       <div class="column is-9">
         <div class="text-reader">
-          <TextReader @onTextRead="onTextRead"></TextReader>
+          <TextReader :maxFiles="maxFiles" v-model="files"></TextReader>
         </div>
-        <Editor :legend="legend" :text="text" :words="words" @onUpdate="onUpdate"></Editor>
-        <TextSaver :filename="filename" :text="text" :words="words"></TextSaver>
+        <div class="tabs">
+          <ul>
+            <li class="" v-for="file in files" :key="file.name">
+              <Sheet
+                :legend="legend"
+                :classes="classes"
+                :filename="file.name"
+                :text="file.text"
+              ></Sheet>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="column is-3">
         <div class="sidebar">
@@ -19,12 +29,12 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import Editor from '@/components/Editor.vue'; // @ is an alias to /src
 import TextReader from '@/components/TextReader.vue';
-import TextSaver from '@/components/TextSaver.vue';
+import Sheet from '@/components/Sheet.vue';
 import Legend from '@/components/Legend.vue';
 
 
+const MAX_FILES = 5;
 const LEGEND = {
   "O" : {name: "その他", example: "てにおは，部活動", shortcut: "O"},
   "ART": {name: "人工物", example: "アーティファクト，カイロスの時", shortcut: "A"},
@@ -40,44 +50,16 @@ const LEGEND = {
 
 @Component({
   components: {
-    Editor,
     TextReader,
-    TextSaver,
+    Sheet,
     Legend,
   },
 })
 export default class Home extends Vue {
-  public filename: string | null = null;
-  public text: string | null = null;
-  public words: object[] = [];
+  private maxFiles: number = MAX_FILES;
+  private files: any[] = [];
   private legend: object = LEGEND;
   private classes: string[] = Object.keys(LEGEND);
-
-  public onTextRead(filename: string, text: string) {
-    this.filename = filename;
-    this.text = text;
-    this.words = this.textToWords(text);
-  }
-
-  public textToWords(text: string): object[] {
-    if (!text) { return []; }
-
-    const words: any[] = [];
-    let id: number = 0;
-    for (const line of text.split("\n")) {
-      if (line === "EOS") break;
-      const word = line.split("\t");
-      let cls: string = word[2] || "O";
-      if (cls !== "O" && !this.classes.includes(cls)) cls = "O";
-      words.push({id: id++, word: word[0], cls, selected: false});
-    }
-    return words;
-  }
-
-  public onUpdate(id: number, attr: string, value: any) {
-    const word: any = this.words[id];
-    word[attr] = value;
-  }
 }
 </script>
 
