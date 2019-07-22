@@ -65,7 +65,7 @@ export default class Home extends Vue {
     const words: any[] = [];
     let id: number = 0;
     for (const line of text.split("\n")) {
-      if (line === "EOS") break;
+      if (line === "EOS") continue;
       const word = line.split("\t");
       let cls: string = word[2] || "O";
       if (cls !== "O" && !this.classes.includes(cls)) cls = "O";

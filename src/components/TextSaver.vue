@@ -34,10 +34,6 @@ export default class TextSaver extends Vue {
     return name + "_annotated";
   }
 
-  private zip(arr1: any[], arr2: any[]): any[] {
-    return arr1.map((_, i) => [arr1[i], arr2[i]]);
-  }
-
   private downloadText(fileName: string, content: string) {
     const blob = new Blob( [ content ], { type: 'text/plain' } );
     const blobAvailable = window.navigator.msSaveBlob !== undefined;
@@ -50,10 +46,30 @@ export default class TextSaver extends Vue {
 
   private download() {
     let result: string = "";
+    const words = Object.assign(this.words);
+    const lines = this.text.split("\n");
 
-    this.zip(this.text.split("\n"), this.words).forEach((pair) => {
-      if (pair[0] === "EOS") return;
-      result += pair[0] + "\t" + pair[1].cls + "\n";
+    let lastCls: string | null = null;
+    lines.forEach((line) => {
+      if (line === "EOS") {
+        result += "EOS\n";
+        return;
+      }
+      const word = words.shift();
+      let cls = word.cls;
+      // OでなければIまたはBをつける
+      if (cls !== "O") {
+        if (lastCls && lastCls === cls) {
+          // 前と同じならI-を追加
+          cls = "I-" + cls;
+        } else {
+          // 前と違うならB-を追加
+          cls = "B-" + cls;
+        }
+      }
+      lastCls = word.cls;
+      const lineWithoutClass = line.split('\t').splice(0, 2);
+      result += lineWithoutClass + "\t" + cls + "\n";
     });
     this.downloadText(this.annotatedName(), result);
   }
