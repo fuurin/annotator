@@ -6,6 +6,7 @@
       :href="downloadLink" 
       :download="annotatedName()"
     >
+      <i class="fas fa-download"></i>&nbsp;
       ダウンロード
     </a>
   </div>
@@ -13,6 +14,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Word } from '@/types/Word.ts';
 
 @Component
 export default class TextSaver extends Vue {
@@ -23,7 +25,7 @@ export default class TextSaver extends Vue {
   public text!: string;
 
   @Prop({required: true})
-  public words!: object[];
+  public words!: Word[];
 
   private downloadLink: string = "#";
 
@@ -31,7 +33,7 @@ export default class TextSaver extends Vue {
     if (this.filename === null) return "#";
     const parts = this.filename.split('.');
     const name = parts.splice(0, parts.length - 1).join(".");
-    return name + "_annotated";
+    return name.endsWith("_annotated") ? name : name + "_annotated";
   }
 
   private downloadText(fileName: string, content: string) {
@@ -46,32 +48,29 @@ export default class TextSaver extends Vue {
 
   private download() {
     let result: string = "";
-    const words = Object.assign(this.words);
-    const lines = this.text.split("\n");
+    const lines: string[] = this.text.split("\n");
 
     let lastCls: string | null = null;
-    lines.forEach((line) => {
-      if (line === "EOS") {
+    for (let i = 0; i < lines.length; i++) {
+      const line: string[] = lines[i].split("\t").splice(0, 2);
+      if (line[0] === "EOS") {
         result += "EOS\n";
-        return;
+        continue;
       }
-      const word = words.shift();
+      const word = this.words[i];
       let cls = word.cls;
-      // OでなければIまたはBをつける
-      if (cls !== "O") {
+      if (cls !== "O") { // OでなければIまたはBをつける
         if (lastCls && lastCls === cls) {
-          // 前と同じならI-を追加
-          cls = "I-" + cls;
+          cls = "I-" + cls; // 前と同じならI-を追加
         } else {
-          // 前と違うならB-を追加
-          cls = "B-" + cls;
+          cls = "B-" + cls; // 前と違うならB-を追加
         }
       }
       lastCls = word.cls;
-      const lineWithoutClass = line.split('\t').splice(0, 2);
-      result += lineWithoutClass + "\t" + cls + "\n";
-    });
-    this.downloadText(this.annotatedName(), result);
+      result += line.join('\t') + "\t" + cls + "\n";
+    }
+
+    this.downloadText(this.annotatedName(), result.trim());
   }
 }
 </script>

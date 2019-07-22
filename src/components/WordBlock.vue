@@ -1,77 +1,55 @@
 <template>
   <div class="box word-block" 
-    :class="{selected: selected}" 
+    :class="{selected: word.selected}" 
     @click="click"
+    @keydown.exact.esc="onUnselect"
+    @keydown.exact.enter="select"
   >
-    <slot></slot><br>
-    <div class="select is-small">
-      <select 
-        @click.stop="" 
-        @change="change" 
-        @keydown.exact.esc="onUnselect"
-        @keydown.exact.enter="select"
-        @keydown="shortcut"
-      >
-        <option v-for="c in classes" :key="c" :selected="c==cls">
-          {{ c }}
-        </option>
-      </select>
-    </div>
+    {{ word.word }}<br>
+    <ClassSelector 
+      :selected="word.cls" 
+      @onClick="clickSelector"
+      @onChange="change">
+    </ClassSelector>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Emit, Vue} from 'vue-property-decorator';
+import { Word } from '@/types/Word.ts';
+import ClassSelector from '@/components/ClassSelector.vue';
 
-@Component
+@Component({
+  components: {
+    ClassSelector,
+  },
+})
 export default class WordBlock extends Vue {
   @Prop({required: true})
-  public legend!: any;
-
-  @Prop({required: true})
-  public classes!: string[];
-
-  @Prop({required: true})
-  public id!: number;
-
-  @Prop({required: true})
-  public selected!: boolean;
-
-  @Prop()
-  public cls?: string;
+  public word!: Word;
 
   @Emit('onSelect')
-  public onSelect(id: number) {}
-
-  @Emit('onChange')
-  public onChange(id: number, cls: string) {}
+  public onSelect(id: number, unselectForSame: boolean = true) {}
 
   @Emit('onUnselect')
   public onUnselect() {}
 
   public click(e: any) {
-    this.onSelect(this.id);
+    this.onSelect(this.word.id);
     e.currentTarget.children[1].children[0].focus(); // selectにフォーカス
   }
 
+  public clickSelector() {
+    this.onSelect(this.word.id, false);
+  }
+
   public select() {
-    if (!this.selected) this.onSelect(this.id);
+    if (!this.word.selected) this.onSelect(this.word.id);
   }
 
-  public change(e: any) {
-    const id = e.target.selectedIndex;
-    const selectedCls: string = this.classes[id];
-    this.onChange(this.id, selectedCls);
-  }
-
-  public shortcut(e: any) {
-    if (!this.selected) return;
-    for (const cls of this.classes) {
-      if (this.legend[cls].shortcut === e.key.toUpperCase()) {
-        this.onChange(this.id, cls);
-        return;
-      }
-    }
+  public change(cls: string) {
+    if (!this.word.selected) return;
+    this.word.cls = cls;
   }
 }
 </script>
@@ -81,7 +59,8 @@ export default class WordBlock extends Vue {
     display: inline-block;
     text-align: center;
     cursor: pointer;
-    margin: 7px;
+    margin: 5px;
+    padding: 8px;
   }
 
   .selected {

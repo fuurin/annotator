@@ -3,14 +3,14 @@
     <div class="columns">
       <div class="column is-9">
         <div class="text-reader">
-          <TextReader @onTextRead="onTextRead"></TextReader>
+          <TextReader @onTextRead="textRead"></TextReader>
         </div>
-        <Editor :legend="legend" :text="text" :words="words" @onUpdate="onUpdate"></Editor>
+        <TextEditor :words="words"></TextEditor>
         <TextSaver :filename="filename" :text="text" :words="words"></TextSaver>
       </div>
       <div class="column is-3">
         <div class="sidebar">
-          <Legend :legend="legend"></Legend>
+          <LegendTable></LegendTable>
         </div>
       </div>
     </div>
@@ -19,64 +19,50 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import Editor from '@/components/Editor.vue'; // @ is an alias to /src
+import { CLASSES } from '@/types/Legend.ts';
+import { Word } from '@/types/Word.ts';
 import TextReader from '@/components/TextReader.vue';
+import TextEditor from '@/components/TextEditor.vue';
 import TextSaver from '@/components/TextSaver.vue';
-import Legend from '@/components/Legend.vue';
-
-
-const LEGEND = {
-  "O" : {name: "その他", example: "てにおは，部活動", shortcut: "O"},
-  "ART": {name: "人工物", example: "アーティファクト，カイロスの時", shortcut: "A"},
-  "EVT": {name: "イベント", example: "アジア通貨危機，台風3号", shortcut: "E"},
-  "LOC": {name: "地名", example: "アメリカ，白巳津川市", shortcut: "L"},
-  "ORG": {name: "組織名", example: "自民党，NHK", shortcut: "R"},
-  "PSN-M": {name: "人名 (男)", example: "瓜生慎吾", shortcut: "M"},
-  "PSN-W": {name: "人名 (女)", example: "天羽みう", shortcut: "W"},
-  "PSN-X": {name: "人名 (その他)", example: "ぱんにゃ", shortcut: "X"},
-  "TIM": {name: "時間", example: "午後三時，10:30", shortcut: "T"},
-  "NUM": {name: "数値", example: "241円，3個，8割", shortcut: "N"},
-};
+import LegendTable from '@/components/LegendTable.vue';
 
 @Component({
   components: {
-    Editor,
     TextReader,
+    TextEditor,
     TextSaver,
-    Legend,
+    LegendTable,
   },
 })
 export default class Home extends Vue {
   public filename: string | null = null;
   public text: string | null = null;
-  public words: object[] = [];
-  private legend: object = LEGEND;
-  private classes: string[] = Object.keys(LEGEND);
+  public words: Word[] = [];
 
-  public onTextRead(filename: string, text: string) {
+  public textRead(filename: string, text: string) {
     this.filename = filename;
     this.text = text;
     this.words = this.textToWords(text);
   }
 
-  public textToWords(text: string): object[] {
+  public textToWords(text: string): Word[] {
     if (!text) { return []; }
-
-    const words: any[] = [];
-    let id: number = 0;
-    for (const line of text.split("\n")) {
-      if (line === "EOS") continue;
-      const word = line.split("\t");
-      let cls: string = word[2] || "O";
-      if (cls !== "O" && !this.classes.includes(cls)) cls = "O";
-      words.push({id: id++, word: word[0], cls, selected: false});
+    const words: Word[] = [];
+    const lines = text.trim().split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const content = lines[i].split("\t");
+      if (content[0] === "EOS") {
+        words.push(new Word(i, content[0], null, false));
+      } else {
+        let cls: string = content[2] || "O";
+        if (cls !== "O") {
+          cls = cls.slice(2);
+          if (!CLASSES.includes(cls)) cls = "O";
+        }
+        words.push(new Word(i, content[0], cls, false));
+      }
     }
     return words;
-  }
-
-  public onUpdate(id: number, attr: string, value: any) {
-    const word: any = this.words[id];
-    word[attr] = value;
   }
 }
 </script>
